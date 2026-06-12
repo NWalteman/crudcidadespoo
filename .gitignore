@@ -1,0 +1,15 @@
+.idea/
+
+target/
+
+data/
+
+.DS_Store
+Thumbs.db
+
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
