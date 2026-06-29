@@ -7,6 +7,7 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import model.Cidade;
+import util.Validador;
 
 // tela de cadastro de cidades com operacoes de incluir, alterar, excluir e pesquisar
 public class TelaCidade extends JFrame {
@@ -208,11 +209,15 @@ public class TelaCidade extends JFrame {
       // interrompe o metodo para nao tentar salvar com dados invalidos
       return;
     }
-    // valida se a UF tem exatamente 2 caracteres
     if (uf.length() != 2) {
       JOptionPane.showMessageDialog(
           this, "UF deve ter 2 caracteres.", "Atenção", JOptionPane.WARNING_MESSAGE);
-      // interrompe o metodo para nao tentar salvar com dados invalidos
+      return;
+    }
+    if (!Validador.ufValida(uf)) {
+      JOptionPane.showMessageDialog(
+          this, "UF inválida. Informe uma sigla de estado brasileiro (ex: SP, RJ, MG).",
+          "Atenção", JOptionPane.WARNING_MESSAGE);
       return;
     }
 

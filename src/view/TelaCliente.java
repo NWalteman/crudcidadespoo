@@ -8,6 +8,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import model.Cidade;
 import model.Cliente;
+import util.Validador;
 
 // tela de cadastro de clientes com operacoes de incluir, alterar, excluir e pesquisar
 public class TelaCliente extends JFrame {
@@ -266,21 +267,35 @@ public class TelaCliente extends JFrame {
     // pega o objeto Cidade selecionado no combobox
     Cidade cidade = (Cidade) comboCidade.getSelectedItem();
 
-    // valida se o nome foi preenchido, pois e o unico campo obrigatorio do cliente
     if (nome.isEmpty()) {
       JOptionPane.showMessageDialog(
           this, "Preencha o nome do cliente.", "Atenção", JOptionPane.WARNING_MESSAGE);
-      // interrompe o metodo para nao tentar salvar sem nome
       return;
     }
-    // valida se uma cidade foi selecionada, pode ser null se nao houver cidades cadastradas
     if (cidade == null) {
       JOptionPane.showMessageDialog(
           this,
           "Selecione uma cidade. Cadastre cidades primeiro.",
           "Atenção",
           JOptionPane.WARNING_MESSAGE);
-      // interrompe o metodo para nao tentar salvar sem cidade
+      return;
+    }
+    if (!Validador.cpfValido(cpf)) {
+      JOptionPane.showMessageDialog(
+          this, "CPF inválido.", "Atenção", JOptionPane.WARNING_MESSAGE);
+      return;
+    }
+    if (!Validador.telefoneValido(telefone)) {
+      JOptionPane.showMessageDialog(
+          this,
+          "Telefone inválido. Informe 10 dígitos (fixo) ou 11 dígitos (celular).",
+          "Atenção",
+          JOptionPane.WARNING_MESSAGE);
+      return;
+    }
+    if (!Validador.emailValido(email)) {
+      JOptionPane.showMessageDialog(
+          this, "E-mail inválido.", "Atenção", JOptionPane.WARNING_MESSAGE);
       return;
     }
 
