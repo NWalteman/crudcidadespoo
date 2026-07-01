@@ -2,276 +2,317 @@ package view;
 
 import dao.CidadeDAO;
 import dao.ClienteDAO;
-import java.awt.*;
 import java.util.List;
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
+import javax.swing.JOptionPane;
 import model.Cidade;
 import model.Cliente;
-import util.Validador;
 
-// tela de cadastro de clientes com operacoes de incluir, alterar, excluir e pesquisar
-public class TelaCliente extends JFrame {
+// tela de cadastro de clientes, jdialog gerado no estilo netbeans gui builder com grouplayout
+public class TelaCliente extends javax.swing.JDialog {
 
   // dao responsavel pelas operacoes de cliente no banco de dados
   private final ClienteDAO clienteDAO = new ClienteDAO();
-
   // dao usado para carregar as cidades no combobox
   private final CidadeDAO cidadeDAO = new CidadeDAO();
 
-  // campos de texto do formulario de dados do cliente
-  private JTextField campoCodigo, campoNome, campoCpf, campoTelefone, campoEmail, campoPesquisa;
-
-  // combobox que lista as cidades disponiveis para o usuario selecionar
-  private JComboBox<Cidade> comboCidade;
-
-  // tabela que exibe a lista de clientes cadastrados
-  private JTable tabela;
-
-  // modelo que gerencia os dados exibidos na tabela (linhas e colunas)
-  private DefaultTableModel modeloTabela;
-
-  // guarda o cliente selecionado na tabela, null quando for um novo cadastro
+  // cliente selecionado na lista, null quando for um novo cadastro
   private Cliente clienteAtual = null;
 
-  public TelaCliente() {
-    // titulo que aparece na barra da janela
-    setTitle("Cadastro de Clientes");
-    // tamanho da janela em pixels, maior que a de cidades por ter mais campos
-    setSize(800, 560);
-    // centraliza a janela no meio da tela
-    setLocationRelativeTo(null);
-    // ao fechar esta janela, apenas ela e fechada, a aplicacao continua rodando
-    setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-    // chama o metodo que cria e posiciona todos os componentes visuais
-    iniciarComponentes();
+  public TelaCliente(java.awt.Frame parent, boolean modal) {
+    // repassa o dono da janela e o modo modal para o construtor do jdialog
+    super(parent, modal);
+    // monta todos os componentes visuais da tela
+    initComponents();
     // popula o combobox de cidades com os registros do banco
     carregarCidades();
-    // carrega todos os clientes do banco na tabela assim que a tela abre
-    carregarTabela(clienteDAO.listarTodos());
+    // carrega todos os clientes do banco na lista assim que a tela abre
+    btnPesquisarActionPerformed(null);
   }
 
-  // cria e organiza todos os componentes visuais da tela
-  private void iniciarComponentes() {
-    // BorderLayout divide a tela em cinco regioes: norte, sul, leste, oeste e centro
-    setLayout(new BorderLayout(10, 10));
+  // initcomponents escrito a mao no padrao gerado pelo netbeans gui builder com grouplayout
+  private void initComponents() {
 
-    // painel do formulario com titulo visivel na borda
-    JPanel painelFormulario = new JPanel(new GridBagLayout());
-    painelFormulario.setBorder(BorderFactory.createTitledBorder("Dados do Cliente"));
+    // cria o label e o campo de codigo
+    lblCodigo = new javax.swing.JLabel();
+    txtCodigo = new javax.swing.JTextField();
+    // cria o label e o campo de nome
+    lblNome = new javax.swing.JLabel();
+    txtNome = new javax.swing.JTextField();
+    // cria o label e o campo de cpf
+    lblCpf = new javax.swing.JLabel();
+    txtCpf = new javax.swing.JTextField();
+    // cria o label e o campo de telefone
+    lblTelefone = new javax.swing.JLabel();
+    txtTelefone = new javax.swing.JTextField();
+    // cria o label e o campo de email
+    lblEmail = new javax.swing.JLabel();
+    txtEmail = new javax.swing.JTextField();
+    // cria o label e o combobox de cidade
+    lblCidade = new javax.swing.JLabel();
+    cmbCidade = new javax.swing.JComboBox<>();
+    // cria os botoes de acao
+    btnNovo = new javax.swing.JButton();
+    btnSalvar = new javax.swing.JButton();
+    btnExcluir = new javax.swing.JButton();
+    // cria o label, o campo e o botao de pesquisa
+    lblPesquisa = new javax.swing.JLabel();
+    txtPesquisa = new javax.swing.JTextField();
+    btnPesquisar = new javax.swing.JButton();
+    // cria a lista de clientes dentro de um scroll pane
+    jScrollPane1 = new javax.swing.JScrollPane();
+    lstClientes = new javax.swing.JList<>();
 
-    // GridBagConstraints controla o posicionamento de cada componente no GridBagLayout
-    GridBagConstraints restricoes = new GridBagConstraints();
-    // espaco de 5 pixels em volta de cada componente
-    restricoes.insets = new Insets(5, 5, 5, 5);
-    // faz os componentes preencherem toda a largura da celula
-    restricoes.fill = GridBagConstraints.HORIZONTAL;
+    // fecha somente esta janela quando o usuario clicar em fechar
+    setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+    // define o titulo exibido na barra da janela
+    setTitle("Cadastro de Clientes");
 
-    // campo de codigo somente leitura, preenchido automaticamente pelo banco
-    campoCodigo = new JTextField(10);
-    campoCodigo.setEditable(false);
+    // texto do label de codigo
+    lblCodigo.setText("Código:");
+    // codigo nao pode ser editado, ele vem do banco
+    txtCodigo.setEditable(false);
+    // codigo nao recebe foco ao navegar com tab ou clicar
+    txtCodigo.setFocusable(false);
 
-    // campos editaveis com os dados do cliente
-    campoNome = new JTextField(30);
-    campoCpf = new JTextField(15);
-    campoTelefone = new JTextField(15);
-    campoEmail = new JTextField(25);
+    // textos dos demais labels do formulario
+    lblNome.setText("Nome:");
+    lblCpf.setText("CPF:");
+    lblTelefone.setText("Telefone:");
+    lblEmail.setText("E-mail:");
+    lblCidade.setText("Cidade:");
 
-    // combobox que sera preenchido com as cidades cadastradas no banco
-    comboCidade = new JComboBox<>();
+    // texto do botao novo e ligacao com o metodo de acao
+    btnNovo.setText("Novo");
+    btnNovo.addActionListener(evt -> btnNovoActionPerformed(evt));
 
-    // posiciona o label "Codigo" na coluna 0, linha 0
-    restricoes.gridx = 0;
-    restricoes.gridy = 0;
-    restricoes.weightx = 0;
-    painelFormulario.add(new JLabel("Código:"), restricoes);
-    // posiciona o campo de codigo na coluna 1, linha 0
-    restricoes.gridx = 1;
-    restricoes.weightx = 1;
-    painelFormulario.add(campoCodigo, restricoes);
+    // texto do botao salvar e ligacao com o metodo de acao
+    btnSalvar.setText("Salvar");
+    btnSalvar.addActionListener(evt -> btnSalvarActionPerformed(evt));
 
-    // posiciona o label "Nome" na coluna 0, linha 1
-    restricoes.gridx = 0;
-    restricoes.gridy = 1;
-    restricoes.weightx = 0;
-    painelFormulario.add(new JLabel("Nome:"), restricoes);
-    // posiciona o campo de nome na coluna 1, linha 1
-    restricoes.gridx = 1;
-    restricoes.weightx = 1;
-    painelFormulario.add(campoNome, restricoes);
+    // texto do botao excluir e ligacao com o metodo de acao
+    btnExcluir.setText("Excluir");
+    btnExcluir.addActionListener(evt -> btnExcluirActionPerformed(evt));
 
-    // posiciona o label "CPF" na coluna 0, linha 2
-    restricoes.gridx = 0;
-    restricoes.gridy = 2;
-    restricoes.weightx = 0;
-    painelFormulario.add(new JLabel("CPF:"), restricoes);
-    // posiciona o campo de CPF na coluna 1, linha 2
-    restricoes.gridx = 1;
-    restricoes.weightx = 1;
-    painelFormulario.add(campoCpf, restricoes);
+    // texto do label de pesquisa
+    lblPesquisa.setText("Pesquisar por nome:");
 
-    // posiciona o label "Telefone" na coluna 0, linha 3
-    restricoes.gridx = 0;
-    restricoes.gridy = 3;
-    restricoes.weightx = 0;
-    painelFormulario.add(new JLabel("Telefone:"), restricoes);
-    // posiciona o campo de telefone na coluna 1, linha 3
-    restricoes.gridx = 1;
-    restricoes.weightx = 1;
-    painelFormulario.add(campoTelefone, restricoes);
+    // texto do botao pesquisar e ligacao com o metodo de acao
+    btnPesquisar.setText("Pesquisar");
+    btnPesquisar.addActionListener(evt -> btnPesquisarActionPerformed(evt));
 
-    // posiciona o label "E-mail" na coluna 0, linha 4
-    restricoes.gridx = 0;
-    restricoes.gridy = 4;
-    restricoes.weightx = 0;
-    painelFormulario.add(new JLabel("E-mail:"), restricoes);
-    // posiciona o campo de email na coluna 1, linha 4
-    restricoes.gridx = 1;
-    restricoes.weightx = 1;
-    painelFormulario.add(campoEmail, restricoes);
+    // liga o listener de selecao da lista ao metodo que preenche o formulario
+    lstClientes.addListSelectionListener(evt -> lstClientesValueChanged(evt));
+    // coloca a lista dentro do scroll pane para suportar muitos registros
+    jScrollPane1.setViewportView(lstClientes);
 
-    // posiciona o label "Cidade" na coluna 0, linha 5
-    restricoes.gridx = 0;
-    restricoes.gridy = 5;
-    restricoes.weightx = 0;
-    painelFormulario.add(new JLabel("Cidade:"), restricoes);
-    // posiciona o combobox de cidades na coluna 1, linha 5
-    restricoes.gridx = 1;
-    restricoes.weightx = 1;
-    painelFormulario.add(comboCidade, restricoes);
+    // cria o grouplayout usado pelo netbeans gui builder e aplica no content pane
+    javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+    getContentPane().setLayout(layout);
+    // grupo horizontal: labels a esquerda, campos a direita, lista e botoes ocupando a largura
+    layout.setHorizontalGroup(
+        layout
+            .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(
+                layout
+                    .createSequentialGroup()
+                    .addContainerGap()
+                    .addGroup(
+                        layout
+                            .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(
+                                jScrollPane1,
+                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                480,
+                                Short.MAX_VALUE)
+                            .addGroup(
+                                layout
+                                    .createSequentialGroup()
+                                    .addGroup(
+                                        layout
+                                            .createParallelGroup(
+                                                javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(lblCodigo)
+                                            .addComponent(lblNome)
+                                            .addComponent(lblCpf)
+                                            .addComponent(lblTelefone)
+                                            .addComponent(lblEmail)
+                                            .addComponent(lblCidade)
+                                            .addComponent(lblPesquisa))
+                                    .addPreferredGap(
+                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addGroup(
+                                        layout
+                                            .createParallelGroup(
+                                                javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(txtCodigo)
+                                            .addComponent(txtNome)
+                                            .addComponent(txtCpf)
+                                            .addComponent(txtTelefone)
+                                            .addComponent(txtEmail)
+                                            .addComponent(
+                                                cmbCidade,
+                                                0,
+                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                Short.MAX_VALUE)
+                                            .addGroup(
+                                                layout
+                                                    .createSequentialGroup()
+                                                    .addComponent(txtPesquisa)
+                                                    .addPreferredGap(
+                                                        javax.swing.LayoutStyle.ComponentPlacement
+                                                            .RELATED)
+                                                    .addComponent(btnPesquisar))))
+                            .addGroup(
+                                layout
+                                    .createSequentialGroup()
+                                    .addComponent(btnNovo)
+                                    .addPreferredGap(
+                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(btnSalvar)
+                                    .addPreferredGap(
+                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(btnExcluir)))
+                    .addContainerGap()));
+    // grupo vertical: uma linha por campo, depois os botoes, a pesquisa e a lista
+    layout.setVerticalGroup(
+        layout
+            .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(
+                layout
+                    .createSequentialGroup()
+                    .addContainerGap()
+                    .addGroup(
+                        layout
+                            .createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(lblCodigo)
+                            .addComponent(
+                                txtCodigo,
+                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(
+                        layout
+                            .createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(lblNome)
+                            .addComponent(
+                                txtNome,
+                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(
+                        layout
+                            .createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(lblCpf)
+                            .addComponent(
+                                txtCpf,
+                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(
+                        layout
+                            .createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(lblTelefone)
+                            .addComponent(
+                                txtTelefone,
+                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(
+                        layout
+                            .createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(lblEmail)
+                            .addComponent(
+                                txtEmail,
+                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(
+                        layout
+                            .createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(lblCidade)
+                            .addComponent(
+                                cmbCidade,
+                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addGroup(
+                        layout
+                            .createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btnNovo)
+                            .addComponent(btnSalvar)
+                            .addComponent(btnExcluir))
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addGroup(
+                        layout
+                            .createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(lblPesquisa)
+                            .addComponent(
+                                txtPesquisa,
+                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnPesquisar))
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addComponent(
+                        jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE)
+                    .addContainerGap()));
 
-    // painel com os tres botoes de acao centralizados com espaco entre eles
-    JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
-    JButton botaoNovo = new JButton("Novo");
-    JButton botaoSalvar = new JButton("Salvar");
-    JButton botaoExcluir = new JButton("Excluir");
-
-    // cada botao chama o metodo correspondente quando clicado
-    botaoNovo.addActionListener(e -> novo());
-    botaoSalvar.addActionListener(e -> salvar());
-    botaoExcluir.addActionListener(e -> excluir());
-
-    // adiciona os botoes ao painel de botoes
-    painelBotoes.add(botaoNovo);
-    painelBotoes.add(botaoSalvar);
-    painelBotoes.add(botaoExcluir);
-
-    // painel superior que agrupa o formulario e os botoes
-    JPanel painelSuperior = new JPanel(new BorderLayout());
-    // formulario ocupa o centro do painel superior
-    painelSuperior.add(painelFormulario, BorderLayout.CENTER);
-    // botoes ficam abaixo do formulario
-    painelSuperior.add(painelBotoes, BorderLayout.SOUTH);
-    // posiciona o painel superior na regiao norte da janela principal
-    add(painelSuperior, BorderLayout.NORTH);
-
-    // painel de pesquisa com campo de texto e botoes de busca
-    JPanel painelPesquisa = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
-    // campo onde o usuario digita o nome para pesquisar
-    campoPesquisa = new JTextField(25);
-    JButton botaoPesquisar = new JButton("Pesquisar");
-    JButton botaoListarTodos = new JButton("Listar Todos");
-
-    // ao clicar em pesquisar, filtra os clientes pelo nome digitado
-    botaoPesquisar.addActionListener(e -> pesquisar());
-    // ao clicar em listar todos, remove o filtro e exibe todos os clientes
-    botaoListarTodos.addActionListener(e -> carregarTabela(clienteDAO.listarTodos()));
-    // pressionar Enter no campo de pesquisa tambem dispara a busca
-    campoPesquisa.addActionListener(e -> pesquisar());
-
-    // adiciona os componentes de pesquisa ao painel
-    painelPesquisa.add(new JLabel("Pesquisar por nome:"));
-    painelPesquisa.add(campoPesquisa);
-    painelPesquisa.add(botaoPesquisar);
-    painelPesquisa.add(botaoListarTodos);
-
-    // modelo da tabela define as colunas e armazena os dados das linhas
-    // isCellEditable retornando false impede que o usuario edite celulas diretamente na tabela
-    modeloTabela =
-        new DefaultTableModel(
-            new String[] {"Código", "Nome", "CPF", "Telefone", "E-mail", "Cidade"}, 0) {
-          @Override
-          public boolean isCellEditable(int linha, int coluna) {
-            // nenhuma celula pode ser editada diretamente na tabela
-            return false;
-          }
-        };
-
-    // cria a tabela com o modelo definido acima
-    tabela = new JTable(modeloTabela);
-    // permite selecionar apenas uma linha por vez
-    tabela.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
-    // quando o usuario clica em uma linha da tabela, preenche o formulario com os dados
-    tabela
-        .getSelectionModel()
-        .addListSelectionListener(
-            e -> {
-              // getValueIsAdjusting evita que o evento dispare duas vezes durante a mesma selecao
-              if (!e.getValueIsAdjusting()) selecionarDaTabela();
-            });
-
-    // coloca a tabela dentro de um painel com barra de rolagem para suportar muitos registros
-    JScrollPane rolagem = new JScrollPane(tabela);
-
-    // painel inferior que agrupa a barra de pesquisa e a tabela
-    JPanel painelInferior = new JPanel(new BorderLayout());
-    // barra de pesquisa no topo do painel inferior
-    painelInferior.add(painelPesquisa, BorderLayout.NORTH);
-    // tabela ocupa o restante do espaco no centro
-    painelInferior.add(rolagem, BorderLayout.CENTER);
-
-    // posiciona o painel inferior na regiao central da janela principal
-    add(painelInferior, BorderLayout.CENTER);
-  }
-
-  // limpa o combobox e recarrega as cidades do banco
-  // chamado ao abrir a tela e ao clicar em Novo para refletir cidades adicionadas recentemente
-  private void carregarCidades() {
-    // remove todos os itens existentes no combobox antes de recarregar
-    comboCidade.removeAllItems();
-    // busca todas as cidades cadastradas no banco
-    List<Cidade> cidades = cidadeDAO.listarTodos();
-    // adiciona cada cidade como um item do combobox
-    // o texto exibido em cada item vem do metodo toString() da classe Cidade
-    for (Cidade c : cidades) {
-      comboCidade.addItem(c);
-    }
+    // calcula o tamanho ideal da janela com base nos componentes
+    pack();
   }
 
   // limpa o formulario e prepara a tela para um novo cadastro
-  private void novo() {
-    // null indica que nao ha cliente selecionado, entao o salvar vai inserir um novo registro
-    clienteAtual = null;
-    // limpa todos os campos do formulario
-    campoCodigo.setText("");
-    campoNome.setText("");
-    campoCpf.setText("");
-    campoTelefone.setText("");
-    campoEmail.setText("");
-    // recarrega as cidades para refletir novos cadastros feitos na tela de cidades
-    carregarCidades();
-    // seleciona a primeira cidade da lista se houver alguma cadastrada
-    if (comboCidade.getItemCount() > 0) comboCidade.setSelectedIndex(0);
-    // move o foco para o campo nome para facilitar a digitacao
-    campoNome.requestFocus();
+  private void limparCampos() {
+    // apaga o codigo mostrado no campo somente leitura
+    txtCodigo.setText("");
+    // apaga os campos editaveis do formulario
+    txtNome.setText("");
+    txtCpf.setText("");
+    txtTelefone.setText("");
+    txtEmail.setText("");
+    // volta o combobox de cidade para o primeiro item, se existir algum
+    if (cmbCidade.getItemCount() > 0) cmbCidade.setSelectedIndex(0);
   }
 
-  // salva ou atualiza um cliente dependendo se clienteAtual e null ou nao
-  private void salvar() {
-    // remove espacos extras nas pontas de cada campo
-    String nome = campoNome.getText().trim();
-    String cpf = campoCpf.getText().trim();
-    String telefone = campoTelefone.getText().trim();
-    String email = campoEmail.getText().trim();
-    // pega o objeto Cidade selecionado no combobox
-    Cidade cidade = (Cidade) comboCidade.getSelectedItem();
+  // recarrega o combobox de cidades com os registros do banco
+  private void carregarCidades() {
+    // remove todos os itens existentes antes de recarregar
+    cmbCidade.removeAllItems();
+    // adiciona cada cidade encontrada no banco como um item do combobox
+    for (Cidade c : cidadeDAO.listarTodos()) {
+      cmbCidade.addItem(c);
+    }
+  }
 
+  private void btnNovoActionPerformed(java.awt.event.ActionEvent evt) {
+    // null indica que nao ha cliente selecionado, o salvar vai inserir um novo registro
+    clienteAtual = null;
+    // limpa os campos do formulario para o novo cadastro
+    limparCampos();
+  }
+
+  private void btnSalvarActionPerformed(java.awt.event.ActionEvent evt) {
+    // le e remove espacos das pontas de cada campo de texto
+    String nome = txtNome.getText().trim();
+    String cpf = txtCpf.getText().trim();
+    String telefone = txtTelefone.getText().trim();
+    String email = txtEmail.getText().trim();
+    // pega a cidade selecionada no combobox
+    Cidade cidade = (Cidade) cmbCidade.getSelectedItem();
+
+    // nome e obrigatorio
     if (nome.isEmpty()) {
       JOptionPane.showMessageDialog(
           this, "Preencha o nome do cliente.", "Atenção", JOptionPane.WARNING_MESSAGE);
       return;
     }
+    // cidade e obrigatoria
     if (cidade == null) {
       JOptionPane.showMessageDialog(
           this,
@@ -280,156 +321,164 @@ public class TelaCliente extends JFrame {
           JOptionPane.WARNING_MESSAGE);
       return;
     }
-    if (!Validador.cpfValido(cpf)) {
-      JOptionPane.showMessageDialog(
-          this, "CPF inválido.", "Atenção", JOptionPane.WARNING_MESSAGE);
-      return;
+
+    // validacao de cpf feita direto aqui, sem chamar classe utilitaria separada
+    if (!cpf.isEmpty()) {
+      // mantem so os digitos do cpf informado
+      String cpfNums = cpf.replaceAll("[^0-9]", "");
+      // cpf precisa ter 11 digitos e nao pode ser uma sequencia repetida
+      boolean cpfOk = cpfNums.length() == 11 && cpfNums.chars().distinct().count() > 1;
+      // confere o primeiro digito verificador
+      if (cpfOk) {
+        int soma = 0;
+        for (int i = 0; i < 9; i++) soma += (cpfNums.charAt(i) - '0') * (10 - i);
+        int dig1 = 11 - (soma % 11);
+        if (dig1 >= 10) dig1 = 0;
+        cpfOk = dig1 == (cpfNums.charAt(9) - '0');
+      }
+      // confere o segundo digito verificador
+      if (cpfOk) {
+        int soma = 0;
+        for (int i = 0; i < 10; i++) soma += (cpfNums.charAt(i) - '0') * (11 - i);
+        int dig2 = 11 - (soma % 11);
+        if (dig2 >= 10) dig2 = 0;
+        cpfOk = dig2 == (cpfNums.charAt(10) - '0');
+      }
+      // se algum dos digitos nao bateu, avisa e interrompe o salvamento
+      if (!cpfOk) {
+        JOptionPane.showMessageDialog(
+            this, "CPF inválido.", "Atenção", JOptionPane.WARNING_MESSAGE);
+        return;
+      }
     }
-    if (!Validador.telefoneValido(telefone)) {
-      JOptionPane.showMessageDialog(
-          this,
-          "Telefone inválido. Informe 10 dígitos (fixo) ou 11 dígitos (celular).",
-          "Atenção",
-          JOptionPane.WARNING_MESSAGE);
-      return;
+
+    // validacao de telefone feita direto aqui: aceita 10 digitos (fixo) ou 11 (celular)
+    if (!telefone.isEmpty()) {
+      String telNums = telefone.replaceAll("[^0-9]", "");
+      if (telNums.length() != 10 && telNums.length() != 11) {
+        JOptionPane.showMessageDialog(
+            this,
+            "Telefone inválido. Informe 10 dígitos (fixo) ou 11 dígitos (celular).",
+            "Atenção",
+            JOptionPane.WARNING_MESSAGE);
+        return;
+      }
     }
-    if (!Validador.emailValido(email)) {
+
+    // validacao de e-mail feita direto aqui com uma expressao regular simples
+    if (!email.isEmpty() && !email.matches("^[\\w._%+\\-]+@[\\w.\\-]+\\.[a-zA-Z]{2,}$")) {
       JOptionPane.showMessageDialog(
           this, "E-mail inválido.", "Atenção", JOptionPane.WARNING_MESSAGE);
       return;
     }
 
-    try {
-      // se clienteAtual for null, e um cadastro novo
-      if (clienteAtual == null) {
-        // cria um novo objeto Cliente com os dados do formulario e salva no banco
-        clienteDAO.salvar(new Cliente(nome, cpf, telefone, email, cidade));
-        JOptionPane.showMessageDialog(this, "Cliente cadastrado com sucesso!");
-      } else {
-        // se clienteAtual tiver valor, e uma edicao do registro ja existente
-        // atualiza cada campo do objeto com os novos valores digitados
-        clienteAtual.setNome(nome);
-        clienteAtual.setCpf(cpf);
-        clienteAtual.setTelefone(telefone);
-        clienteAtual.setEmail(email);
-        // atualiza a cidade vinculada ao cliente com a selecionada no combobox
-        clienteAtual.setCidade(cidade);
-        // envia as alteracoes para o banco
-        clienteDAO.atualizar(clienteAtual);
-        JOptionPane.showMessageDialog(this, "Cliente atualizado com sucesso!");
-      }
-      // limpa o formulario apos salvar
-      novo();
-      // recarrega a tabela para mostrar o registro salvo ou atualizado
-      carregarTabela(clienteDAO.listarTodos());
-    } catch (Exception e) {
-      // exibe a mensagem de erro caso algo falhe no banco
-      JOptionPane.showMessageDialog(
-          this, "Erro: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+    // se nao ha cliente selecionado, monta um objeto novo e insere no banco
+    if (clienteAtual == null) {
+      Cliente novo = new Cliente(nome, cpf, telefone, email, cidade);
+      clienteDAO.salvar(novo);
+      clienteAtual = novo;
+    } else {
+      // se ja existe um cliente selecionado, atualiza os campos e envia a alteracao para o banco
+      clienteAtual.setNome(nome);
+      clienteAtual.setCpf(cpf);
+      clienteAtual.setTelefone(telefone);
+      clienteAtual.setEmail(email);
+      clienteAtual.setCidade(cidade);
+      clienteDAO.atualizar(clienteAtual);
     }
+
+    // mostra o codigo gerado ou existente no campo somente leitura
+    txtCodigo.setText(String.valueOf(clienteAtual.getId()));
+    // avisa o usuario que a operacao deu certo
+    JOptionPane.showMessageDialog(this, "Cliente salvo com sucesso!");
+    // atualiza a lista para refletir o registro salvo
+    btnPesquisarActionPerformed(null);
   }
 
-  // remove o cliente selecionado do banco de dados
-  private void excluir() {
-    // nao permite excluir se nenhum cliente estiver selecionado no formulario
-    if (clienteAtual == null) {
+  private void btnExcluirActionPerformed(java.awt.event.ActionEvent evt) {
+    // nao deixa excluir se nenhum cliente estiver selecionado
+    if (txtCodigo.getText().isEmpty()) {
       JOptionPane.showMessageDialog(
           this, "Selecione um cliente para excluir.", "Atenção", JOptionPane.WARNING_MESSAGE);
       return;
     }
 
-    // pede confirmacao do usuario antes de excluir permanentemente
-    int ok =
-        JOptionPane.showConfirmDialog(
-            this,
-            "Deseja excluir o cliente '" + clienteAtual.getNome() + "'?",
-            "Confirmar exclusão",
-            JOptionPane.YES_NO_OPTION);
-
-    // so executa a exclusao se o usuario confirmar clicando em "Sim"
-    if (ok == JOptionPane.YES_OPTION) {
-      try {
-        // remove o registro do banco de dados
-        clienteDAO.excluir(clienteAtual);
-        JOptionPane.showMessageDialog(this, "Cliente excluído com sucesso!");
-        // limpa o formulario apos excluir
-        novo();
-        // recarrega a tabela removendo o registro excluido da lista
-        carregarTabela(clienteDAO.listarTodos());
-      } catch (Exception e) {
-        JOptionPane.showMessageDialog(
-            this, "Erro ao excluir: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
-      }
-    }
+    // remove o cliente selecionado do banco de dados
+    clienteDAO.excluir(clienteAtual);
+    // volta a referencia para null, ja que o registro nao existe mais
+    clienteAtual = null;
+    // limpa o formulario apos a exclusao
+    limparCampos();
+    // avisa o usuario que a exclusao deu certo
+    JOptionPane.showMessageDialog(this, "Cliente excluído com sucesso!");
+    // atualiza a lista removendo o registro excluido
+    btnPesquisarActionPerformed(null);
   }
 
-  // filtra a tabela exibindo apenas os clientes cujo nome contenha o texto pesquisado
-  private void pesquisar() {
-    // pega o texto digitado no campo de pesquisa, sem espacos nas pontas
-    String termo = campoPesquisa.getText().trim();
-    // se o campo estiver vazio, lista todos os clientes sem filtro
-    carregarTabela(termo.isEmpty() ? clienteDAO.listarTodos() : clienteDAO.pesquisarPorNome(termo));
-  }
+  private void btnPesquisarActionPerformed(java.awt.event.ActionEvent evt) {
+    // le o texto digitado no campo de pesquisa, sem espacos nas pontas
+    String termo = txtPesquisa.getText().trim();
+    // se o campo estiver vazio, lista todos os clientes, senao filtra pelo nome
+    List<Cliente> lista =
+        termo.isEmpty() ? clienteDAO.listarTodos() : clienteDAO.pesquisarPorNome(termo);
 
-  // preenche a tabela com a lista de clientes recebida como parametro
-  private void carregarTabela(List<Cliente> lista) {
-    // remove todas as linhas existentes antes de adicionar os novos dados
-    modeloTabela.setRowCount(0);
-    // percorre a lista e adiciona cada cliente como uma nova linha na tabela
+    // monta um novo modelo de lista com os clientes encontrados
+    javax.swing.DefaultListModel<Cliente> modelo = new javax.swing.DefaultListModel<>();
     for (Cliente c : lista) {
-      // cada linha contem codigo, nome, cpf, telefone, email e o nome da cidade
-      modeloTabela.addRow(
-          new Object[] {
-            c.getId(),
-            c.getNome(),
-            // campos opcionais podem ser null, exibe string vazia nesse caso
-            c.getCpf(),
-            c.getTelefone(),
-            c.getEmail(),
-            // getCidade pode retornar null em casos extremos, exibe vazio para nao quebrar
-            c.getCidade() != null ? c.getCidade().toString() : ""
-          });
+      modelo.addElement(c);
     }
+    // troca o modelo da jlist pelo modelo recem montado
+    lstClientes.setModel(modelo);
   }
 
-  // preenche o formulario com os dados da linha que o usuario clicou na tabela
-  private void selecionarDaTabela() {
-    // getSelectedRow retorna -1 se nenhuma linha estiver selecionada
-    int linha = tabela.getSelectedRow();
-    // se nenhuma linha estiver selecionada, sai do metodo sem fazer nada
-    if (linha < 0) return;
+  private void lstClientesValueChanged(javax.swing.event.ListSelectionEvent evt) {
+    // getValueIsAdjusting evita que o evento dispare duas vezes durante a mesma selecao
+    if (evt.getValueIsAdjusting()) return;
 
-    // pega o valor da coluna 0 (codigo) da linha selecionada
-    Long id = (Long) modeloTabela.getValueAt(linha, 0);
+    // pega o cliente selecionado na lista
+    Cliente selecionado = lstClientes.getSelectedValue();
+    // se nenhum item estiver selecionado, nao faz nada
+    if (selecionado == null) return;
 
-    // busca o objeto Cliente completo no banco pelo id para ter todos os dados atualizados
-    clienteAtual = clienteDAO.buscarPorId(id);
+    // busca o cliente completo no banco pelo id para ter todos os dados atualizados
+    clienteAtual = clienteDAO.buscarPorId(selecionado.getId());
+    // se por algum motivo o registro nao existir mais, nao faz nada
+    if (clienteAtual == null) return;
 
-    // so preenche o formulario se o objeto foi encontrado no banco
-    if (clienteAtual != null) {
-      // exibe o codigo no campo somente leitura
-      campoCodigo.setText(String.valueOf(clienteAtual.getId()));
-      // exibe o nome no campo de texto editavel
-      campoNome.setText(clienteAtual.getNome());
-      // campos opcionais podem ser null, por isso exibe string vazia se for o caso
-      campoCpf.setText(clienteAtual.getCpf() != null ? clienteAtual.getCpf() : "");
-      campoTelefone.setText(clienteAtual.getTelefone() != null ? clienteAtual.getTelefone() : "");
-      campoEmail.setText(clienteAtual.getEmail() != null ? clienteAtual.getEmail() : "");
-
-      // recarrega as cidades no combobox para garantir que estejam atualizadas
-      carregarCidades();
-      // percorre os itens do combobox para encontrar e selecionar a cidade do cliente
-      if (clienteAtual.getCidade() != null) {
-        for (int i = 0; i < comboCidade.getItemCount(); i++) {
-          // compara pelo id para evitar problemas com equals mal implementado
-          if (comboCidade.getItemAt(i).getId().equals(clienteAtual.getCidade().getId())) {
-            // seleciona o item correspondente no combobox
-            comboCidade.setSelectedIndex(i);
-            // para o loop assim que encontrar a cidade correta
-            break;
-          }
-        }
-      }
-    }
+    // preenche o campo de codigo com o id do cliente
+    txtCodigo.setText(String.valueOf(clienteAtual.getId()));
+    // preenche o campo de nome
+    txtNome.setText(clienteAtual.getNome());
+    // preenche o cpf, campos opcionais podem ser null, entao exibe vazio nesse caso
+    txtCpf.setText(clienteAtual.getCpf() != null ? clienteAtual.getCpf() : "");
+    // preenche o telefone
+    txtTelefone.setText(clienteAtual.getTelefone() != null ? clienteAtual.getTelefone() : "");
+    // preenche o email
+    txtEmail.setText(clienteAtual.getEmail() != null ? clienteAtual.getEmail() : "");
+    // seleciona no combobox a cidade vinculada ao cliente
+    cmbCidade.setSelectedItem(clienteAtual.getCidade());
   }
+
+  // declaracao das variaveis dos componentes gerados pelo gui builder, nao modificar
+  private javax.swing.JButton btnExcluir;
+  private javax.swing.JButton btnNovo;
+  private javax.swing.JButton btnPesquisar;
+  private javax.swing.JButton btnSalvar;
+  private javax.swing.JComboBox<Cidade> cmbCidade;
+  private javax.swing.JScrollPane jScrollPane1;
+  private javax.swing.JLabel lblCidade;
+  private javax.swing.JLabel lblCodigo;
+  private javax.swing.JLabel lblCpf;
+  private javax.swing.JLabel lblEmail;
+  private javax.swing.JLabel lblNome;
+  private javax.swing.JLabel lblPesquisa;
+  private javax.swing.JLabel lblTelefone;
+  private javax.swing.JList<Cliente> lstClientes;
+  private javax.swing.JTextField txtCodigo;
+  private javax.swing.JTextField txtCpf;
+  private javax.swing.JTextField txtEmail;
+  private javax.swing.JTextField txtNome;
+  private javax.swing.JTextField txtPesquisa;
+  private javax.swing.JTextField txtTelefone;
+  // fim da declaracao das variaveis
 }

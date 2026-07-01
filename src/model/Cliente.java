@@ -36,7 +36,8 @@ public class Cliente {
   @JoinColumn(name = "cidade_id", nullable = false)
   private Cidade cidade;
 
-  // construtor sem argumentos exigido pelo Hibernate para criar objetos ao buscar registros do banco
+  // construtor sem argumentos exigido pelo Hibernate para criar objetos ao buscar registros do
+  // banco
   public Cliente() {}
 
   // construtor utilizado na tela para criar um objeto Cliente antes de salvar no banco

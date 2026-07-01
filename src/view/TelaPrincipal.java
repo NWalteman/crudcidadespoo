@@ -40,7 +40,7 @@ public class TelaPrincipal extends JFrame {
 
             if (imagemFundo != null) {
               // calcula a escala necessaria para cobrir toda a area do painel sem distorcer
-              // Math.max garante que nenhuma dimensao fique menor que o painel
+              // usa Math.max para garantir que nenhuma dimensao fique menor que o painel
               double pw = getWidth(), ph = getHeight();
               double iw = imagemFundo.getWidth(null), ih = imagemFundo.getHeight(null);
               double escala = Math.max(pw / iw, ph / ih);
@@ -93,14 +93,14 @@ public class TelaPrincipal extends JFrame {
     botaoCidades.setAlignmentX(Component.CENTER_ALIGNMENT);
     botaoClientes.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-    // ao clicar, cria e exibe a tela de cadastro de cidades
-    botaoCidades.addActionListener(e -> new TelaCidade().setVisible(true));
-    // ao clicar, cria e exibe a tela de cadastro de clientes
-    botaoClientes.addActionListener(e -> new TelaCliente().setVisible(true));
+    // ao clicar, cria e exibe a tela de cadastro de cidades como dialogo modal
+    botaoCidades.addActionListener(e -> new TelaCidade(this, true).setVisible(true));
+    // ao clicar, cria e exibe a tela de cadastro de clientes como dialogo modal
+    botaoClientes.addActionListener(e -> new TelaCliente(this, true).setVisible(true));
 
     // painel que empilha os botoes verticalmente e respeita o tamanho preferido deles
     JPanel painelBotoes = new JPanel();
-    // BoxLayout Y_AXIS empilha os componentes de cima para baixo
+    // empilha os componentes de cima para baixo usando BoxLayout Y_AXIS
     painelBotoes.setLayout(new BoxLayout(painelBotoes, BoxLayout.Y_AXIS));
     // opaco false para o fundo da imagem aparecer atras dos botoes
     painelBotoes.setOpaque(false);
@@ -141,7 +141,7 @@ public class TelaPrincipal extends JFrame {
       InputStream is = getClass().getClassLoader().getResourceAsStream("media/fundowindows.jpg");
       // so tenta ler se o arquivo foi encontrado
       if (is != null) {
-        // ImageIO.read converte o stream em um objeto Image utilizavel pelo Swing
+        // converte o stream em um objeto Image utilizavel pelo Swing usando ImageIO.read
         return ImageIO.read(is);
       }
     } catch (Exception ignorada) {

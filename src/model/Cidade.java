@@ -11,7 +11,7 @@ public class Cidade {
   // @Id marca este campo como a chave primaria da tabela
   @Id
   // @GeneratedValue faz o banco gerar o valor do id automaticamente a cada novo registro
-  // IDENTITY usa o mecanismo de auto incremento do proprio banco (H2, MySQL, etc.)
+  // estrategia identity usa o mecanismo de auto incremento do proprio banco (H2, MySQL, etc.)
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   // tipo Long para suportar numeros grandes como identificadores
   private Long id;
@@ -26,7 +26,8 @@ public class Cidade {
   @Column(nullable = false, length = 2)
   private String uf;
 
-  // construtor sem argumentos exigido pelo Hibernate para criar objetos ao buscar registros do banco
+  // construtor sem argumentos exigido pelo Hibernate para criar objetos ao buscar registros do
+  // banco
   public Cidade() {}
 
   // construtor utilizado na tela para criar um objeto Cidade antes de salvar no banco
@@ -68,7 +69,7 @@ public class Cidade {
   }
 
   // o JComboBox chama este metodo para exibir o texto de cada item na lista de cidades
-  // retorna o nome e a uf separados por traco, ex: "Curitiba - PR"
+  // retorna o nome e a uf separados por um traco, seguindo o formato usado no combobox
   @Override
   public String toString() {
     return nome + " - " + uf;

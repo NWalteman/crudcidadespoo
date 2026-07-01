@@ -10,7 +10,7 @@ public class Main {
     try {
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     } catch (Exception ignorada) {
-      // se falhar, o Swing usa o visual padrao dele mesmo, nao e um erro critico
+      // se falhar, o Swing usa o visual padrao, nao e um erro critico
     }
 
     // o Swing nao e thread-safe: todos os componentes visuais devem ser criados
